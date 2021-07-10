@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-fluid">
+    <div class="row row-no-gutters">
+        <div class="col-xs-12 col-md-8">
+            <div class="user-info">
+                <div class="media">
+                    <div class="media-left media-middle">
+                        <a href="#">
+                            <img class="media-object" style="width: 48px; height: 48px;" src="https://pastebin.com/themes/pastebin/img/guest.png" alt="useravatar">
+                        </a>
+                    </div>
+                    <div class="media-body">
+                        <h5 class="media-heading" style="font-weight: bold">Guest</h5>
+                        ...
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="form-title">
+                RAW Paste Data
+            </div>
+            <textarea class="form-control" name="content" rows="15" style="resize: none">{{ paste_bin.content | safe }}</textarea>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

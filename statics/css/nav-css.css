@@ -44,3 +44,23 @@ hr.new-hr{
     margin: 5px 0;
 
 }
+
+div.item-title{
+    font-size: 16px;
+    color: #f63333;
+    font-weight: lighter;
+}
+
+.title-p{
+    margin-bottom: 0;
+}
+
+.item-info{
+    font-size: 12px;
+    color: darkgrey;
+    font-weight: lighter;
+}
+
+.user-info{
+
+}

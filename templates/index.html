@@ -1,15 +1,15 @@
 {% extends 'base.html' %}
 {% block content %}
-    <div class="container-fluid">
+<div class="container-fluid">
     <div class="row row-no-gutters">
         <div class="col-xs-12 col-md-8">
-            <form>
+            <form method="post">
                 <div class="form-group">
                     <div class="form-title">
                         New Paste
                     </div>
 
-                    <textarea class="form-control" rows="15" style="resize: none"></textarea>
+                    <textarea class="form-control" name="content" rows="15" style="resize: none"></textarea>
                 </div>
                 <div class="form-group">
 
@@ -23,9 +23,9 @@
                                 <div class="form-group">
                                     <label for="Highlighting" class="col-sm-3 control-label">语法高亮：</label>
                                     <div class="col-sm-8">
-                                        <select class="form-control" id="Highlighting">
+                                        <select class="form-control" name="heighlight" id="Highlighting">
                                             <option>None</option>
-                                            <option>2</option>
+                                            <option>是</option>
                                             <option>3</option>
                                             <option>4</option>
                                             <option>5</option>
@@ -35,43 +35,48 @@
                                 <div class="form-group">
                                     <label for="Expiration" class="col-sm-3 control-label">到期时间：</label>
                                     <div class="col-sm-8">
-                                        <select class="form-control" id="Expiration">
-                                            <option>Never</option>
-                                            <option>2</option>
-                                            <option>3</option>
-                                            <option>4</option>
-                                            <option>5</option>
+                                        <select class="form-control" name="expiration" id="Expiration">
+                                            <option value="Never">从不</option>
+                                            <option value="BurnAfterRead">阅后即焚</option>
+                                            <option value="TenMinutesAfter">10分钟后</option>
+                                            <option value="OneHourAfter">1小时后</option>
+                                            <option value="OneDayAfter">1天后</option>
+                                            <option value="OneWeekAfter">1周后</option>
+                                            <option value="TwoWeeksAfter">2周后</option>
+                                            <option value="OneMonthAfter">1个月后</option>
+                                            <option value="SixMonthAfter">6个月后</option>
+                                            <option value="OneYearAfter">1年后</option>
                                         </select>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label for="Exposure" class="col-sm-3 control-label">访问限制：</label>
                                     <div class="col-sm-8">
-                                        <select class="form-control" id="Exposure">
-                                            <option>Public</option>
-                                            <option>2</option>
-                                            <option>3</option>
-                                            <option>4</option>
-                                            <option>5</option>
+                                        <select class="form-control" name="access_right" id="Exposure">
+                                            <option value="Public">公开</option>
+                                            <option value="UnListed">公开不展示</option>
+                                            <option value="Private">私有</option>
                                         </select>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label for="Password" class="col-sm-3 control-label">访问密码：</label>
                                     <div class="col-sm-8">
-
                                         <div class="checkbox">
-                                            <label>
-                                                <input type="checkbox"> Disabled
+                                            <label id="pwd_enable_label">
+                                                <input type="checkbox" id="pwd_enable" name="pwd_enable"
+                                                       onchange="pwd_change(this)" value="false"> Disabled
                                             </label>
                                         </div>
-                                        <input type="email" class="form-control" id="Password" placeholder="访问密码">
+                                        <input type="text" class="form-control" name="access_passwd" id="Password"
+                                               placeholder="访问密码" disabled>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label for="Title" class="col-sm-3 control-label">标题：</label>
                                     <div class="col-sm-8">
-                                        <input type="email" class="form-control" id="Title" placeholder="标题">
+                                        <input type="text" class="form-control" name="title" id="Title"
+                                               placeholder="标题">
                                     </div>
                                 </div>
                             </div>
@@ -85,7 +90,6 @@
                     </div>
                 </div>
 
-
             </form>
 
 
@@ -93,24 +97,50 @@
         <div class="col-xs-6 col-md-4">
             <div class="paste-div">
                 {% if is_login %}
-                    <div class="form-title">
+                <div class="form-title">
 
-                        My Pastes
-                    </div>
+                    My Pastes
+                </div>
                 {% endif %}
 
                 <div class="form-title">
                     Public Pastes
                 </div>
+                {% for item in paste_bin_list %}
+                <div class="public-list">
+                    <div class="item-title">
+                        {% if item.title %}
+                        <p class="title-p"><a href="{{url_for('user_app.view_paste', paste_id=item.id )}}">{{ item.title }}</a></p>
+                        {% else %}
+                        <p class="title-p">{{ item.content }}</p>
+                        {% endif %}
+                    </div>
+                    <p class="item-info">{{ item.timestamp }}|{{ item.is_highlight }}</p>
+                    <hr class="new-hr">
+                </div>
+                {% endfor %}
             </div>
 
 
         </div>
 
     </div>
-    </div>
+</div>
 
-
-
+{% endblock %}
+{% block js_block %}
+<script>
+    function pwd_change(checkbox) {
+        if (checkbox.checked === false) {
+            checkbox.value = false;
+            $('#Password').attr('disabled', true);
+            $('#pwd_enable_label').html('<input type="checkbox" id="pwd_enable" name="pwd_enable" onchange="pwd_change(this)" value="false"> Disabled')
+        } else {
+            checkbox.value = true;
+            $('#Password').attr('disabled', false);
+            $('#pwd_enable_label').html('<input type="checkbox" id="pwd_enable" name="pwd_enable" onchange="pwd_change(this)" value="true" checked> Enabled')
+        }
+    }
+</script>
 
 {% endblock %}

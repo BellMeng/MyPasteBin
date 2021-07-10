@@ -4,10 +4,12 @@
 @Date    ：2021/7/10 9:38 
 '''
 
+import os
+
 
 class MySQLConfig(object):
     user = 'root'
-    password = '********'
+    password = 'whm980617'
     ip = 'localhost'
     port = '3306'
     database = 'pastebin'
@@ -25,3 +27,4 @@ class BaseConfig(object):
     SQLALCHEMY_DATABASE_URI = MySQLConfig().URI
     SQLALCHEMY_TRACK_MODIFICATIONS = True
     DEBUG = True
+    SECRET_KEY = os.urandom(24)

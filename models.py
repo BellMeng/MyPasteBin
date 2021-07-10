@@ -10,6 +10,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
+
 class Role(db.Model):
     __tablename__ = 'roles'
     id = db.Column(db.Integer, primary_key=True)
@@ -23,7 +24,7 @@ class Role(db.Model):
 class User(db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
-    pastes = db.relationship('PasteBin', backref='user')
+    # pastes = db.relationship('PasteBin', backref='user')
     avatar = db.Column(db.String(128))
     username = db.Column(db.String(128))
     password = db.Column(db.String(128))
@@ -55,8 +56,9 @@ class AccessRights(enum.Enum):
 
 class PasteBin(db.Model):
     id = db.Column(db.String(30), primary_key=True)
-    user = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True, server_default=None)
+    user = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     content = db.Column(db.Text)
+    title = db.Column(db.String(128))
     is_highlight = db.Column(db.Boolean, default=False)
     access = db.Column(db.Enum(AccessRights))
     access_password = db.Column(db.String(20))
@@ -65,3 +67,10 @@ class PasteBin(db.Model):
     view_time = db.Column(db.Integer, default=0)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     is_burn = db.Column(db.Boolean, default=False)
+
+    def set_attrs(self, attrs_dict):
+        for key, value in attrs_dict.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+            if key == "paste_bin_id":
+                setattr(self, 'id', value)
