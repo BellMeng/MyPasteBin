@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>MyPasteBin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/nav-css.css') }}" />
+    <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.js') }}"></script>
+</head>
+<body>
+<nav class="navbar navbar-default navbar-fixed-top navbar-color">
+    <div class="container-fluid nav-per">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+{#            <img src="https://pastebin.com/themes/pastebin/img/pastebin_logo_side_outline.png" />#}
+            <a class="brand navbar-brand" style="color: white" href="#">MyPasteBin</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <div class="nav navbar-nav navbar-right">
+                <a class="btn btn-default navbar-btn" style="margin-right: 10px" href="#" role="button">Login</a>
+                <a class="btn btn-default navbar-btn" href="#" role="button">Sign Up</a>
+            </div>
+        </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+</nav>
+
+<div class="page-content">
+
+
+
+    {% block content %}
+
+    {% endblock %}
+</div>
+
+</body>
+</html>
