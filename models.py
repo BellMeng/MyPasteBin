@@ -13,7 +13,7 @@ db = SQLAlchemy()
 
 class Role(db.Model):
     __tablename__ = 'roles'
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(64))
     user = db.relationship('User', backref='role')
 
@@ -23,7 +23,7 @@ class Role(db.Model):
 
 class User(db.Model):
     __tablename__ = 'user'
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     # pastes = db.relationship('PasteBin', backref='user')
     avatar = db.Column(db.String(128))
     username = db.Column(db.String(128))
@@ -54,12 +54,20 @@ class AccessRights(enum.Enum):
     Private = '私人'
 
 
+class CodeType(enum.Enum):
+    Text = '.txt'
+    MarkDown = '.md'
+    Css = '.css'
+    JavaScript = '.js'
+    Python = '.py'
+    Java = '.java'
+
 class PasteBin(db.Model):
     id = db.Column(db.String(30), primary_key=True)
     user = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     content = db.Column(db.Text)
     title = db.Column(db.String(128))
-    is_highlight = db.Column(db.Boolean, default=False)
+    is_highlight = db.Column(db.Enum(CodeType), default='Text')
     access = db.Column(db.Enum(AccessRights))
     access_password = db.Column(db.String(20))
     expiration = db.Column(db.Enum(ExpirationTime))

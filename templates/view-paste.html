@@ -5,6 +5,7 @@
         <div class="col-xs-12 col-md-8">
             <div class="user-info">
                 <div class="media">
+                    {% if not paste_bin.user %}
                     <div class="media-left media-middle">
                         <a href="#">
                             <img class="media-object" style="width: 48px; height: 48px;" src="https://pastebin.com/themes/pastebin/img/guest.png" alt="useravatar">
@@ -14,11 +15,22 @@
                         <h5 class="media-heading" style="font-weight: bold">Guest</h5>
                         ...
                     </div>
+                    {% else %}
+                    <div class="media-left media-middle">
+                        <a href="#">
+                            <img class="media-object" style="width: 48px; height: 48px;" src="{{ pub_user.avatar }}" alt="useravatar">
+                        </a>
+                    </div>
+                    <div class="media-body">
+                        <h5 class="media-heading" style="font-weight: bold">{{ pub_user.username }}</h5>
+                        ...
+                    </div>
+                    {% endif %}
                 </div>
 
             </div>
 
-
+            <pre data-src="myfile.css" data-download-link class="language-css" data-src-status="loaded"><code class="language-css line-numbers">{{ paste_bin.content }}</code></pre>
             <div class="form-title">
                 RAW Paste Data
             </div>

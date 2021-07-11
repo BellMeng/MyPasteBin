@@ -60,6 +60,8 @@ div.item-title{
     font-weight: lighter;
 }
 
-.user-info{
-
+.user-info-index{
+    padding: 15px;
+    border-left: 1px solid darkgrey;
+    border-bottom: 1px solid darkgrey;
 }

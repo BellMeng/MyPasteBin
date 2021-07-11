@@ -8,7 +8,6 @@
                     <div class="form-title">
                         New Paste
                     </div>
-
                     <textarea class="form-control" name="content" rows="15" style="resize: none"></textarea>
                 </div>
                 <div class="form-group">
@@ -24,11 +23,9 @@
                                     <label for="Highlighting" class="col-sm-3 control-label">语法高亮：</label>
                                     <div class="col-sm-8">
                                         <select class="form-control" name="heighlight" id="Highlighting">
-                                            <option>None</option>
-                                            <option>是</option>
-                                            <option>3</option>
-                                            <option>4</option>
-                                            <option>5</option>
+                                            {% for item in code_type %}
+                                            <option>{{ item }}</option>
+                                            {% endfor %}
                                         </select>
                                     </div>
                                 </div>
@@ -55,7 +52,12 @@
                                         <select class="form-control" name="access_right" id="Exposure">
                                             <option value="Public">公开</option>
                                             <option value="UnListed">公开不展示</option>
-                                            <option value="Private">私有</option>
+
+                                            <option value="Private"
+                                            {% if not user %}
+                                                    disabled
+                                            {% endif %}
+                                            >私有</option>
                                         </select>
                                     </div>
                                 </div>
@@ -86,7 +88,39 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-xs-6 col-md-6">.col-xs-6</div>
+                        <div class="col-xs-6 col-md-6">
+                            <div class="user-info-index">
+                                {% if not user %}
+                                <div class="media">
+                                    <div class="media-left media-middle">
+                                        <a href="#">
+                                            <img class="media-object" style="width: 48px; height: 48px;" src="https://pastebin.com/themes/pastebin/img/guest.png" alt="useravatar">
+                                        </a>
+                                    </div>
+                                    <div class="media-body">
+                                        <h5 class="media-heading" style="font-weight: bold">Guest</h5>
+                                        <a class="btn btn-default btn-sm" href="{{ url_for('user_app.login')}}" role="button">Login</a>
+                                        or <a class="btn btn-default btn-sm" href="{{ url_for('user_app.signup')}}" role="button">SignUp</a>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <div class="media">
+                                    <div class="media-left media-middle">
+                                        <a href="#">
+                                            <img class="media-object" style="width: 48px; height: 48px;" src="{{ user.avatar }}" alt="useravatar">
+                                        </a>
+                                    </div>
+                                    <div class="media-body">
+                                        <h5 class="media-heading" style="font-weight: bold">{{ user.username }}</h5>
+                                        {{ user.email }}
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                            </div>
+
+
+                        </div>
                     </div>
                 </div>
 

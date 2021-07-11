@@ -7,8 +7,21 @@
                 Login Page
             </div>
             <hr class="new-hr">
+            {% if verify_result and verify_result['status'] == 'error' %}
+            <div class="alert alert-danger alert-dismissible" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <strong>Error!</strong>
+                {{ verify_result['msg'] }}
+            </div>
+            {% endif %}
+
+            {% if verify_result and verify_result['status'] == 'successful' %}
+            <script>
+                window.location.href = "{{ url_for('user_app.index') }}";
+            </script>
+            {% endif %}
             <div class="row row-no-gutters">
-                <form class="form-horizontal">
+                <form class="form-horizontal" method="post">
                     <div style="padding: 15px">
                         <div class="form-group">
                             <label for="username" class="col-sm-2 control-label">用户名：</label>

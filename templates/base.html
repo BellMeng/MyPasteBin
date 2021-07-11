@@ -5,7 +5,9 @@
     <title>MyPasteBin</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/nav-css.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/prism.css') }}" />
     <script src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/prism.js') }}"></script>
     <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.js') }}"></script>
 </head>
 <body>
@@ -19,10 +21,21 @@
 
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            {% if not user %}
             <div class="nav navbar-nav navbar-right">
                 <a class="btn btn-default navbar-btn" style="margin-right: 10px" href="{{ url_for('user_app.login')}}" role="button">Login</a>
                 <a class="btn btn-default navbar-btn" href="{{ url_for('user_app.signup')}}" role="button">Sign Up</a>
             </div>
+
+            {% else %}
+            <div class="nav navbar-nav navbar-right">
+                <a href="#" style="margin-right: 10px">
+                    <img class="img-rounded" style="width: 38px; height: 38px;" src="https://pastebin.com/themes/pastebin/img/guest.png" alt="useravatar">
+                </a>
+                <p class="navbar-text" style="color: white; font-weight: bold">{{ user.username }}</p>
+                <a class="btn btn-default navbar-btn" href="{{ url_for('user_app.logout')}}" role="button">Logout</a>
+            </div>
+            {% endif %}
         </div><!-- /.navbar-collapse -->
     </div><!-- /.container-fluid -->
 </nav>

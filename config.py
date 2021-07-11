@@ -27,4 +27,4 @@ class BaseConfig(object):
     SQLALCHEMY_DATABASE_URI = MySQLConfig().URI
     SQLALCHEMY_TRACK_MODIFICATIONS = True
     DEBUG = True
-    SECRET_KEY = os.urandom(24)
+    SECRET_KEY = '--*.&This is a test by XiaChuFang.?./*--'
