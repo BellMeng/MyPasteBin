@@ -9,12 +9,16 @@ from models import db, PasteBin, Role, User, CodeType
 from config import BaseConfig
 import time
 from hashlib import md5
+import uuid
 
 user_app = Blueprint('user_app', __name__)
 
 
 def create_pastebin_id():
-    return str(int(time.time()))[-8:]
+    uid = str(uuid.uuid4())
+    suid = ''.join(uid.split('-'))
+    suid = suid[-22:] + str(hex(int(time.time())))[-8:]
+    return suid
 
 
 def make_password(password):
@@ -26,6 +30,11 @@ def make_password(password):
 
 
 def parse_post(form):
+    """
+    解析表单，生成字典（包含pastebin信息）
+    :param form:
+    :return:
+    """
     paste_bin_objec_dict = {}
     paste_bin_objec_dict['paste_bin_id'] = create_pastebin_id()
     if form.get('user'):
@@ -37,11 +46,21 @@ def parse_post(form):
     paste_bin_objec_dict['access_password'] = form.get('access_passwd')
     paste_bin_objec_dict['pwd_enable'] = True if form.get('pwd_enable') else False
     paste_bin_objec_dict['expiration'] = form.get('expiration')
+    if form.get('expiration') == 'Never':
+        paste_bin_objec_dict['never_expiration'] = True
+    elif form.get('expiration') == 'BurnAfterRead':
+        paste_bin_objec_dict['is_burn'] = True
     return paste_bin_objec_dict
 
 
 @user_app.route('/', endpoint='index', methods=['GET', 'POST'])
 def index():
+    """
+    判断登录信息，
+    根据request.method判断是否提交pastebin信息
+
+    :return:
+    """
     user = None
     if session.get('is_login') and session.get('user_id'):
         user = User.query.filter_by(id=session.get('user_id')).first()
@@ -49,11 +68,13 @@ def index():
     if request.method == "POST":
         obj_dict = parse_post(request.form)
         try:
+            if user:
+                obj_dict['user'] = session.get('user_id')
             pastebin = PasteBin()
             pastebin.set_attrs(obj_dict)
             db.session.add(pastebin)
             db.session.commit()
-            return redirect(url_for('user_app.view_paste', pastebin.id))
+            return redirect(url_for('user_app.view_paste', paste_id=pastebin.id))
         except Exception:
             return render_template('index.html', paste_bin_list=paste_bin_list, user=user,
                                    code_type=CodeType._member_names_, error=True)
@@ -64,6 +85,11 @@ def index():
 
 
 def login_verify(form):
+    """
+    登录表单验证
+    :param form:
+    :return:
+    """
     username = form.get('username')
     password = form.get('password')
     if not username or not password:
@@ -91,7 +117,7 @@ def login():
 
 def signup_verify_form(form):
     """
-    验证表单信息正确性
+    注册表单信息验证
     :param form:
     :return:
     """
@@ -150,6 +176,12 @@ def signup():
 
 @user_app.route('/view/<paste_id>', endpoint='view_paste', methods=['GET', 'POST'])
 def view_paste(paste_id):
+    """
+    查看pastebin，已实现密码验证
+    过期还未实现
+    :param paste_id:
+    :return:
+    """
     user = None
     if session.get('is_login') and session.get('user_id'):
         user = User.query.filter_by(id=session.get('user_id')).first()
@@ -157,17 +189,22 @@ def view_paste(paste_id):
     if paste_id:
         pub_user = None
         paste_bin = PasteBin.query.filter_by(id=str(paste_id)).first()
-        if paste_bin and paste_bin.is_burn:
+        if paste_bin and not paste_bin.is_burn:
             pub_user = paste_bin.user if not paste_bin.user else User.query.filter_by(
                 id=paste_bin.user).first()
         else:
             return '不存在'
         if request.method == 'GET':
+            if not paste_bin.access_password:
+                paste_bin.view_time += 1
+                db.session.commit()
             return render_template('view-paste.html', paste_bin=paste_bin, user=user, pub_user=pub_user)
         else:
             password = request.form.get('password')
             if password == paste_bin.access_password:
                 pwd_auth = True
+                paste_bin.view_time += 1
+                db.session.commit()
 
                 return render_template('view-paste.html', paste_bin=paste_bin, user=user, pub_user=pub_user, pwd_auth=pwd_auth)
             return render_template('view-paste.html', paste_bin=paste_bin, user=user, pub_user=pub_user)
@@ -178,6 +215,10 @@ def view_paste(paste_id):
 
 @user_app.route('/logout', endpoint='logout')
 def logout():
+    """
+    退出登录
+    :return:
+    """
     if session.get('is_login') and session.get('user_id'):
         session.pop('is_login')
         session.pop('user_id')
@@ -186,6 +227,12 @@ def logout():
 
 @user_app.route('/download/<paste_id>/<filename>', endpoint='download')
 def download(paste_id, filename='tmp.txt'):
+    """
+    文件的下载链接
+    :param paste_id:
+    :param filename:
+    :return:
+    """
     if paste_id:
         paste_bin = PasteBin.query.filter_by(id=str(paste_id)).all()
         if paste_bin:

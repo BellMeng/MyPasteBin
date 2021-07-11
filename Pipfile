@@ -9,6 +9,7 @@ flask = "==1.1.2"
 pymysql = "*"
 flask-migrate = "==2.7.0"
 flask-script = "*"
+python-dateutil = "*"
 
 [dev-packages]
 

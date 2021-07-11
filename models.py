@@ -5,8 +5,9 @@
 '''
 
 import enum
-from datetime import datetime
+import datetime
 from flask_sqlalchemy import SQLAlchemy
+from dateutil.relativedelta import relativedelta
 
 db = SQLAlchemy()
 
@@ -36,16 +37,16 @@ class User(db.Model):
 
 
 class ExpirationTime(enum.Enum):
-    Never = "从不"
-    BurnAfterRead = "阅后即焚"
-    TenMinutesAfter = "10分钟后"
-    OneHourAfter = "1小时后"
-    OneDayAfter = "1天后"
-    OneWeekAfter = "1周后"
-    TwoWeeksAfter = "2周后"
-    OneMonthAfter = "1个月后"
-    SixMonthAfter = "6个月后"
-    OneYearAfter = "1年后"
+    Never = ("从不", 0)
+    BurnAfterRead = ("阅后即焚", 0)
+    TenMinutesAfter = ("10分钟后", datetime.timedelta(minutes=10))
+    OneHourAfter = ("1小时后", datetime.timedelta(hours=1))
+    OneDayAfter = ("1天后", datetime.timedelta(days=1))
+    OneWeekAfter = ("1周后", datetime.timedelta(weeks=1))
+    TwoWeeksAfter = ("2周后", datetime.timedelta(weeks=2))
+    OneMonthAfter = ("1个月后", relativedelta(months=+1))
+    SixMonthAfter = ("6个月后", relativedelta(months=+6))
+    OneYearAfter = ("1年后", relativedelta(years=+1))
 
 
 class AccessRights(enum.Enum):
@@ -62,6 +63,7 @@ class CodeType(enum.Enum):
     Python = 'py'
     Java = 'java'
 
+
 class PasteBin(db.Model):
     id = db.Column(db.String(30), primary_key=True)
     user = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
@@ -73,7 +75,7 @@ class PasteBin(db.Model):
     expiration = db.Column(db.Enum(ExpirationTime))
     never_expiration = db.Column(db.Boolean)
     view_time = db.Column(db.Integer, default=0)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    timestamp = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     is_burn = db.Column(db.Boolean, default=False)
 
     def set_attrs(self, attrs_dict):
