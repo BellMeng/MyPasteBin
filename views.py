@@ -49,14 +49,21 @@ def index():
         return render_template('index.html', paste_bin_list=paste_bin_list)
 
 
-@user_app.route('/login', endpoint='login')
+@user_app.route('/login', endpoint='login', methods=['GET', 'POST'])
 def login():
-    return render_template('login.html')
+    if request.method == "GET":
+
+        return render_template('login.html')
+    else:
+        return '登录成功'
 
 
-@user_app.route('/signup', endpoint='singnup')
+@user_app.route('/signup', endpoint='signup', methods=['GET', 'POST'])
 def signup():
-    return render_template('signup.html')
+    if request.method == 'GET':
+        return render_template('signup.html')
+    else:
+        return '注册成功'
 
 
 @user_app.route('/view/<paste_id>', endpoint='view_paste')

@@ -14,14 +14,14 @@
         <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">
 {#            <img src="https://pastebin.com/themes/pastebin/img/pastebin_logo_side_outline.png" />#}
-            <a class="brand navbar-brand" style="color: white" href="#">MyPasteBin</a>
+            <a class="brand navbar-brand" style="color: white" href="{{ url_for('user_app.index') }}">MyPasteBin</a>
         </div>
 
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <div class="nav navbar-nav navbar-right">
-                <a class="btn btn-default navbar-btn" style="margin-right: 10px" href="#" role="button">Login</a>
-                <a class="btn btn-default navbar-btn" href="#" role="button">Sign Up</a>
+                <a class="btn btn-default navbar-btn" style="margin-right: 10px" href="{{ url_for('user_app.login')}}" role="button">Login</a>
+                <a class="btn btn-default navbar-btn" href="{{ url_for('user_app.signup')}}" role="button">Sign Up</a>
             </div>
         </div><!-- /.navbar-collapse -->
     </div><!-- /.container-fluid -->
