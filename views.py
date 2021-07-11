@@ -6,8 +6,9 @@
 
 from flask import Blueprint, render_template, request, url_for, session, redirect, Response
 from models import db, PasteBin, Role, User, CodeType
-
+from config import BaseConfig
 import time
+from hashlib import md5
 
 user_app = Blueprint('user_app', __name__)
 
@@ -16,14 +17,22 @@ def create_pastebin_id():
     return str(int(time.time()))[-8:]
 
 
+def make_password(password):
+    password = BaseConfig.SECRET_KEY + password
+    md5_obj = md5()
+    md5_obj.update(password.encode())
+    ret = md5_obj.hexdigest()
+    return ret
+
+
 def parse_post(form):
     paste_bin_objec_dict = {}
     paste_bin_objec_dict['paste_bin_id'] = create_pastebin_id()
     if form.get('user'):
         paste_bin_objec_dict['user'] = form.get('user')
     paste_bin_objec_dict['content'] = form.get('content')
-    paste_bin_objec_dict['title'] = form.get('title')
-    paste_bin_objec_dict['is_highlight'] = True if form.get('heighlight') else False
+    paste_bin_objec_dict['title'] = form.get('title') if form.get('title') else 'Untitled'
+    paste_bin_objec_dict['is_highlight'] = form.get('heighlight')
     paste_bin_objec_dict['access'] = form.get('access_right')
     paste_bin_objec_dict['access_password'] = form.get('access_passwd')
     paste_bin_objec_dict['pwd_enable'] = True if form.get('pwd_enable') else False
@@ -36,6 +45,7 @@ def index():
     user = None
     if session.get('is_login') and session.get('user_id'):
         user = User.query.filter_by(id=session.get('user_id')).first()
+    paste_bin_list = PasteBin.query.filter_by(access='Public').order_by(PasteBin.timestamp.desc()).all()
     if request.method == "POST":
         obj_dict = parse_post(request.form)
         try:
@@ -43,12 +53,14 @@ def index():
             pastebin.set_attrs(obj_dict)
             db.session.add(pastebin)
             db.session.commit()
-            return "提交成功"
+            return redirect(url_for('user_app.view_paste', pastebin.id))
         except Exception:
-            return '提交失败'
+            return render_template('index.html', paste_bin_list=paste_bin_list, user=user,
+                                   code_type=CodeType._member_names_, error=True)
     else:
-        paste_bin_list = PasteBin.query.filter_by(access='Public').order_by(PasteBin.timestamp.desc()).all()
-        return render_template('index.html', paste_bin_list=paste_bin_list, user=user, code_type=CodeType._member_names_)
+
+        return render_template('index.html', paste_bin_list=paste_bin_list, user=user,
+                               code_type=CodeType._member_names_)
 
 
 def login_verify(form):
@@ -56,7 +68,7 @@ def login_verify(form):
     password = form.get('password')
     if not username or not password:
         return {'status': 'error', 'msg': '用户名和密码不能为空！'}
-    user = User.query.filter_by(username=username, password=password).first()
+    user = User.query.filter_by(username=username, password=make_password(password)).first()
     if not user:
         return {'status': 'error', 'msg': '用户名不存在或密码错误！'}
     else:
@@ -104,7 +116,7 @@ def signup_verify_form(form):
         'user_info': {
             'username': username,
             'email': email,
-            'password': password,
+            'password': make_password(password),
             'avatar': 'https://pastebin.com/themes/pastebin/img/guest.png'
         }
     }
@@ -136,18 +148,30 @@ def signup():
         return render_template('signup.html', verify_result=verify_result)
 
 
-@user_app.route('/view/<paste_id>', endpoint='view_paste')
+@user_app.route('/view/<paste_id>', endpoint='view_paste', methods=['GET', 'POST'])
 def view_paste(paste_id):
     user = None
     if session.get('is_login') and session.get('user_id'):
         user = User.query.filter_by(id=session.get('user_id')).first()
+
     if paste_id:
-        paste_bin = PasteBin.query.filter_by(id=str(paste_id)).all()
-        if paste_bin:
-            pub_user = paste_bin[0].user if not paste_bin[0].user else User.query.filter_by(id=paste_bin[0].user).first()
-            return render_template('view-paste.html', paste_bin=paste_bin[0], user=user, pub_user=pub_user)
+        pub_user = None
+        paste_bin = PasteBin.query.filter_by(id=str(paste_id)).first()
+        if paste_bin and paste_bin.is_burn:
+            pub_user = paste_bin.user if not paste_bin.user else User.query.filter_by(
+                id=paste_bin.user).first()
         else:
             return '不存在'
+        if request.method == 'GET':
+            return render_template('view-paste.html', paste_bin=paste_bin, user=user, pub_user=pub_user)
+        else:
+            password = request.form.get('password')
+            if password == paste_bin.access_password:
+                pwd_auth = True
+
+                return render_template('view-paste.html', paste_bin=paste_bin, user=user, pub_user=pub_user, pwd_auth=pwd_auth)
+            return render_template('view-paste.html', paste_bin=paste_bin, user=user, pub_user=pub_user)
+
     else:
         return '您访问的页面不存在'
 
@@ -161,11 +185,11 @@ def logout():
 
 
 @user_app.route('/download/<paste_id>/<filename>', endpoint='download')
-def view_paste(paste_id, filename='tmp.txt'):
+def download(paste_id, filename='tmp.txt'):
     if paste_id:
         paste_bin = PasteBin.query.filter_by(id=str(paste_id)).all()
         if paste_bin:
-            return Response(paste_bin[0].content, mimetype='application/js')
+            return Response(paste_bin[0].content, mimetype='application/' + str(paste_bin[0].is_highlight.value))
         else:
             return '您访问的资源不存在'
     else:

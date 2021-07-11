@@ -8,33 +8,58 @@
                     {% if not paste_bin.user %}
                     <div class="media-left media-middle">
                         <a href="#">
-                            <img class="media-object" style="width: 48px; height: 48px;" src="https://pastebin.com/themes/pastebin/img/guest.png" alt="useravatar">
+                            <img class="media-object" style="width: 48px; height: 48px;"
+                                 src="https://pastebin.com/themes/pastebin/img/guest.png" alt="useravatar">
                         </a>
                     </div>
                     <div class="media-body">
                         <h5 class="media-heading" style="font-weight: bold">Guest</h5>
-                        ...
+                        <p class="item-info">{{ paste_bin.access.value }} | 到期时间：{{ paste_bin.expiration.value }}</p>
                     </div>
                     {% else %}
                     <div class="media-left media-middle">
                         <a href="#">
-                            <img class="media-object" style="width: 48px; height: 48px;" src="{{ pub_user.avatar }}" alt="useravatar">
+                            <img class="media-object" style="width: 48px; height: 48px;" src="{{ pub_user.avatar }}"
+                                 alt="useravatar">
                         </a>
                     </div>
                     <div class="media-body">
                         <h5 class="media-heading" style="font-weight: bold">{{ pub_user.username }}</h5>
-                        ...
+                        {{ paste_bin.access.value }} | {{ paste_bin.expiration.value }}
                     </div>
                     {% endif %}
                 </div>
 
             </div>
-
-            <pre data-src="myfile.css" data-download-link class="language-css" data-src-status="loaded"><code class="language-css line-numbers">{{ paste_bin.content }}</code></pre>
+            {% if not paste_bin.access_password or pwd_auth%}
+            <pre data-src="{{ url_for('user_app.download', filename=paste_bin.title+'.'+paste_bin.is_highlight.value, paste_id=paste_bin.id) }}"
+                 data-download-link class="language-{{ paste_bin.is_highlight.value }}" data-src-status="loaded"><code
+                    class="language-{{ paste_bin.is_highlight.value }} line-numbers">{{ paste_bin.content | safe }}</code></pre>
             <div class="form-title">
                 RAW Paste Data
             </div>
-            <textarea class="form-control" name="content" rows="15" style="resize: none">{{ paste_bin.content | safe }}</textarea>
+            <textarea class="form-control" name="content" rows="15"
+                      style="resize: none">{{ paste_bin.content | safe }}</textarea>
+            {% else %}
+            <div class="row row-no-gutters">
+                <form class="form-horizontal" method="post">
+                    <div style="padding: 15px">
+                        <div class="form-group">
+                            <label for="password" class="col-sm-2 control-label">访问密码：</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" name="password" id="password"
+                                       placeholder="请输入访问密码">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <button type="submit" class="btn btn-primary">访问</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>

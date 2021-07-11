@@ -55,12 +55,12 @@ class AccessRights(enum.Enum):
 
 
 class CodeType(enum.Enum):
-    Text = '.txt'
-    MarkDown = '.md'
-    Css = '.css'
-    JavaScript = '.js'
-    Python = '.py'
-    Java = '.java'
+    Text = 'txt'
+    MarkDown = 'md'
+    Css = 'css'
+    JavaScript = 'js'
+    Python = 'py'
+    Java = 'java'
 
 class PasteBin(db.Model):
     id = db.Column(db.String(30), primary_key=True)
