@@ -9,7 +9,7 @@ import os
 
 class MySQLConfig(object):
     user = 'root'
-    password = 'whm980617'
+    password = '*******'
     ip = 'localhost'
     port = '3306'
     database = 'pastebin'

@@ -75,7 +75,7 @@ class PasteBin(db.Model):
     expiration = db.Column(db.Enum(ExpirationTime))
     never_expiration = db.Column(db.Boolean)
     view_time = db.Column(db.Integer, default=0)
-    timestamp = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    timestamp = db.Column(db.DateTime, default=datetime.datetime.now)
     is_burn = db.Column(db.Boolean, default=False)
 
     def set_attrs(self, attrs_dict):

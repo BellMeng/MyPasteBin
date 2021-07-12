@@ -14,7 +14,7 @@
                     </div>
                     <div class="media-body">
                         <h5 class="media-heading" style="font-weight: bold">Guest</h5>
-                        <p class="item-info">{{ paste_bin.access.value }} | 到期时间：{{ paste_bin.expiration.value }}</p>
+                        <p class="item-info">{{ paste_bin.access.value }} | 到期时间：{{ paste_bin.expiration.value[0] }}</p>
                     </div>
                     {% else %}
                     <div class="media-left media-middle">
@@ -25,13 +25,20 @@
                     </div>
                     <div class="media-body">
                         <h5 class="media-heading" style="font-weight: bold">{{ pub_user.username }}</h5>
-                        {{ paste_bin.access.value }} | {{ paste_bin.expiration.value }}
+                        {{ paste_bin.access.value }} | 到期时间：{{ paste_bin.expiration.value[0] }}
                     </div>
                     {% endif %}
                 </div>
 
             </div>
-            {% if not paste_bin.access_password or pwd_auth%}
+            {% if is_out_of_date %}
+            <div class="alert alert-danger alert-dismissible" role="alert" style="margin-top: 20px">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <strong>Error!</strong>
+                您访问的资源已过期！
+            </div>
+
+            {% elif not paste_bin.access_password or pwd_auth%}
             <pre data-src="{{ url_for('user_app.download', filename=paste_bin.title+'.'+paste_bin.is_highlight.value, paste_id=paste_bin.id) }}"
                  data-download-link class="language-{{ paste_bin.is_highlight.value }}" data-src-status="loaded"><code
                     class="language-{{ paste_bin.is_highlight.value }} line-numbers">{{ paste_bin.content | safe }}</code></pre>
@@ -40,6 +47,8 @@
             </div>
             <textarea class="form-control" name="content" rows="15"
                       style="resize: none">{{ paste_bin.content | safe }}</textarea>
+
+
             {% else %}
             <div class="row row-no-gutters">
                 <form class="form-horizontal" method="post">

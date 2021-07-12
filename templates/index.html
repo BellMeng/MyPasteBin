@@ -137,11 +137,24 @@
         </div>
         <div class="col-xs-6 col-md-4">
             <div class="paste-div">
-                {% if is_login %}
+                {% if user %}
                 <div class="form-title">
 
                     My Pastes
                 </div>
+                {% for item in personal_paste_bin_list %}
+                <div class="public-list">
+                    <div class="item-title">
+                        {% if item.title %}
+                        <p class="title-p"><a href="{{url_for('user_app.view_paste', paste_id=item.id )}}">{{ item.title }}</a></p>
+                        {% else %}
+                        <p class="title-p">{{ item.content }}</p>
+                        {% endif %}
+                    </div>
+                    <p class="item-info">{{ item.timestamp }} | {{ item.is_highlight }}</p>
+                    <hr class="new-hr">
+                </div>
+                {% endfor %}
                 {% endif %}
 
                 <div class="form-title">
@@ -156,7 +169,7 @@
                         <p class="title-p">{{ item.content }}</p>
                         {% endif %}
                     </div>
-                    <p class="item-info">{{ item.timestamp }}|{{ item.is_highlight }}</p>
+                    <p class="item-info">{{ item.timestamp }} | {{ item.is_highlight }}</p>
                     <hr class="new-hr">
                 </div>
                 {% endfor %}

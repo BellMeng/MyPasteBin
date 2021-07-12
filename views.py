@@ -8,6 +8,7 @@ from flask import Blueprint, render_template, request, url_for, session, redirec
 from models import db, PasteBin, Role, User, CodeType
 from config import BaseConfig
 import time
+import datetime
 from hashlib import md5
 import uuid
 
@@ -62,8 +63,10 @@ def index():
     :return:
     """
     user = None
+    personal_paste_bin_list=None
     if session.get('is_login') and session.get('user_id'):
         user = User.query.filter_by(id=session.get('user_id')).first()
+        personal_paste_bin_list = PasteBin.query.filter_by(user=user.id).order_by(PasteBin.timestamp.desc()).all()
     paste_bin_list = PasteBin.query.filter_by(access='Public').order_by(PasteBin.timestamp.desc()).all()
     if request.method == "POST":
         obj_dict = parse_post(request.form)
@@ -76,11 +79,11 @@ def index():
             db.session.commit()
             return redirect(url_for('user_app.view_paste', paste_id=pastebin.id))
         except Exception:
-            return render_template('index.html', paste_bin_list=paste_bin_list, user=user,
+            return render_template('index.html', paste_bin_list=paste_bin_list,personal_paste_bin_list=personal_paste_bin_list, user=user,
                                    code_type=CodeType._member_names_, error=True)
     else:
 
-        return render_template('index.html', paste_bin_list=paste_bin_list, user=user,
+        return render_template('index.html', paste_bin_list=paste_bin_list,personal_paste_bin_list=personal_paste_bin_list, user=user,
                                code_type=CodeType._member_names_)
 
 
@@ -198,15 +201,28 @@ def view_paste(paste_id):
             if not paste_bin.access_password:
                 paste_bin.view_time += 1
                 db.session.commit()
+            if (paste_bin.is_burn and paste_bin.view_time > 2) or (
+                    not paste_bin.never_expiration and paste_bin.timestamp + paste_bin.expiration.value[
+                1] < datetime.datetime.now()):
+                is_out_of_date = True
+                return render_template('view-paste.html', paste_bin=paste_bin, user=user, pub_user=pub_user, is_out_of_date=is_out_of_date)
             return render_template('view-paste.html', paste_bin=paste_bin, user=user, pub_user=pub_user)
         else:
             password = request.form.get('password')
+
+            if (paste_bin.is_burn and paste_bin.view_time > 2) or (
+                    not paste_bin.never_expiration and paste_bin.timestamp + paste_bin.expiration.value[
+                1] < datetime.datetime.now()):
+                is_out_of_date = True
+                return render_template('view-paste.html', paste_bin=paste_bin, user=user, pub_user=pub_user, is_out_of_date=is_out_of_date)
+
             if password == paste_bin.access_password:
                 pwd_auth = True
                 paste_bin.view_time += 1
                 db.session.commit()
 
-                return render_template('view-paste.html', paste_bin=paste_bin, user=user, pub_user=pub_user, pwd_auth=pwd_auth)
+                return render_template('view-paste.html', paste_bin=paste_bin, user=user, pub_user=pub_user,
+                                       pwd_auth=pwd_auth)
             return render_template('view-paste.html', paste_bin=paste_bin, user=user, pub_user=pub_user)
 
     else:
